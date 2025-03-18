@@ -65,7 +65,7 @@
             margin-top: 30px;
         }
         .register-button {
-            width: 200px;  /* Decreased width */
+            width: 200px;
             padding: 12px;
             font-size: 18px;
             background: #28a745;
@@ -78,6 +78,24 @@
         }
         .register-button:hover {
             background: #218838;
+        }
+        .register-button.loading {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .loader {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid white;
+            border-radius: 50%;
+            border-top: 2px solid transparent;
+            animation: spin 0.6s linear infinite;
+            margin-left: 8px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
         p {
             margin-top: 20px;
@@ -101,52 +119,70 @@
         </div>
     </div>
 
-    <!-- Register button separated from form with reduced width -->
     <div class="register-container">
-        <button class="register-button" onclick="registerUser()">Register</button>
+        <button id="registerButton" class="register-button" onclick="registerUser()">Register</button>
     </div>
 
     <p id="message"></p>
 
     <script>
         let selectedSlot = "";
-    
+
         function selectSlot(button, time) {
             document.querySelectorAll(".slot-button").forEach(btn => btn.classList.remove("selected"));
             button.classList.add("selected");
             selectedSlot = time;
         }
-    
+
         function registerUser() {
             let email = document.getElementById("email").value;
-            
+            let registerButton = document.getElementById("registerButton");
+            let message = document.getElementById("message");
+
+            // Reset message
+            message.innerText = "";
+
             if (!email) {
                 alert("Please enter an email");
                 return;
             }
-    
+
             if (!selectedSlot) {
                 alert("Please select a time slot");
                 return;
             }
-    
-            fetch("https://mock-interview-matcher.onrender.com/register", {
+
+            // Disable button and show loader
+            registerButton.innerHTML = 'Registering... <span class="loader"></span>';
+            registerButton.disabled = true;
+            registerButton.classList.add("loading");
+
+            fetch("http://localhost:8080/register", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/x-www-form-urlencoded"
                 },
                 body: "email=" + encodeURIComponent(email) + "&time_slot=" + encodeURIComponent(selectedSlot)
             })
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById("message").innerText = "Successfully registered. You will receive a mail when a match is found.";
+            .then(async response => {
+                let data = await response.json();
+                if (response.ok) {
+                    message.innerText = "Successfully registered. You will receive a mail when a match is found.";
+                } else {
+                    message.innerText = "Error: " + (data.error || "Something went wrong.");
+                }
             })
             .catch(error => {
-                console.error("Error:", error);
-                document.getElementById("message").innerText = "An error occurred. Please try again.";
+                console.error("Network Error:", error);
+                message.innerText = "Network error. Please check your connection.";
+            })
+            .finally(() => {
+                // Reset button after request completes
+                registerButton.innerHTML = "Register";
+                registerButton.disabled = false;
+                registerButton.classList.remove("loading");
             });
         }
     </script>
-    
 </body>
 </html>
