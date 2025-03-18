@@ -110,13 +110,13 @@
 
     <script>
         let selectedSlot = "";
-
+    
         function selectSlot(button, time) {
             document.querySelectorAll(".slot-button").forEach(btn => btn.classList.remove("selected"));
             button.classList.add("selected");
             selectedSlot = time;
         }
-
+    
         function registerUser() {
             let email = document.getElementById("email").value;
             
@@ -124,12 +124,12 @@
                 alert("Please enter an email");
                 return;
             }
-
+    
             if (!selectedSlot) {
                 alert("Please select a time slot");
                 return;
             }
-
+    
             fetch("https://mock-interview-matcher.onrender.com/register", {
                 method: "POST",
                 headers: {
@@ -139,13 +139,14 @@
             })
             .then(response => response.json())
             .then(data => {
-                document.getElementById("message").innerText = data.message;
-                if (data.meet_link) {
-                    document.getElementById("message").innerHTML += `<br><a href="${data.meet_link}" target="_blank">Join Meeting</a>`;
-                }
+                document.getElementById("message").innerText = "Successfully registered. You will receive a mail when a match is found.";
             })
-            .catch(error => console.error("Error:", error));
+            .catch(error => {
+                console.error("Error:", error);
+                document.getElementById("message").innerText = "An error occurred. Please try again.";
+            });
         }
     </script>
+    
 </body>
 </html>
