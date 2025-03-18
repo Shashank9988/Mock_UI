@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mock Interview Matcher</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
+            margin: 50px;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            max-width: 400px;
+            margin: auto;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #007BFF;
+            font-size: 26px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        p.subtitle {
+            color: #555;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .slots {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .slot-button {
+            padding: 10px 15px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: #007BFF;
+            color: white;
+            transition: 0.3s;
+        }
+        .slot-button:hover {
+            background-color: #0056b3;
+        }
+        .slot-button.selected {
+            background-color: #28a745;
+        }
+        .register-container {
+            margin-top: 30px;
+        }
+        .register-button {
+            width: 200px;  /* Decreased width */
+            padding: 12px;
+            font-size: 18px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.3s;
+            font-weight: bold;
+        }
+        .register-button:hover {
+            background: #218838;
+        }
+        p {
+            margin-top: 20px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Mock Interview Matcher</h1>
+        <p class="subtitle">Practice your interviews with real people & improve your skills!</p>
+
+        <input type="email" id="email" placeholder="Enter your email">
+        
+        <h3>Select a Time Slot</h3>
+        <div class="slots">
+            <button class="slot-button" onclick="selectSlot(this, '10:00AM')">10:00 AM</button>
+            <button class="slot-button" onclick="selectSlot(this, '11:00AM')">11:00 AM</button>
+            <button class="slot-button" onclick="selectSlot(this, '02:00PM')">02:00 PM</button>
+            <button class="slot-button" onclick="selectSlot(this, '04:00PM')">04:00 PM</button>
+        </div>
+    </div>
+
+    <!-- Register button separated from form with reduced width -->
+    <div class="register-container">
+        <button class="register-button" onclick="registerUser()">Register</button>
+    </div>
+
+    <p id="message"></p>
+
+    <script>
+        let selectedSlot = "";
+
+        function selectSlot(button, time) {
+            document.querySelectorAll(".slot-button").forEach(btn => btn.classList.remove("selected"));
+            button.classList.add("selected");
+            selectedSlot = time;
+        }
+
+        function registerUser() {
+            let email = document.getElementById("email").value;
+            
+            if (!email) {
+                alert("Please enter an email");
+                return;
+            }
+
+            if (!selectedSlot) {
+                alert("Please select a time slot");
+                return;
+            }
+
+            fetch("https://mock-interview-matcher.onrender.com", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
+                body: "email=" + encodeURIComponent(email) + "&time_slot=" + encodeURIComponent(selectedSlot)
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("message").innerText = data.message;
+                if (data.meet_link) {
+                    document.getElementById("message").innerHTML += `<br><a href="${data.meet_link}" target="_blank">Join Meeting</a>`;
+                }
+            })
+            .catch(error => console.error("Error:", error));
+        }
+    </script>
+</body>
+</html>
